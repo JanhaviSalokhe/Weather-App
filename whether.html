@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather App</title>
+  <link rel="stylesheet" href="whether.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css" />
+</head>
+<body>
+  <section class="container">
+    <!-- Search Bar -->
+    <div class="Weather_header">
+      <form class="Weather_search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input placeholder="Search your city.." type="text" class="city_name" />
+      </form>
+    </div>
+
+    <!-- Weather Main Information -->
+    <div class="weather_body">
+      <h1 class="weather_city"></h1>
+      <p class="weather_data_time"></p>
+      <p class="weather_forecast"></p>
+      <div class="weather_icon"></div>
+      <p class="weather_temperature"></p>
+      <div class="weather_minmax">
+        <p class="weather_min"></p>
+        <p class="weather_max"></p>
+      </div>
+    </div>
+
+    <!-- Extra Info -->
+    <section class="extra_info">
+      <div class="weather_card">
+        <i class="fa-solid fa-temperature-low"></i>
+        <div>
+          <p>Feels Like</p>
+          <p class="weather_feelslike"></p>
+        </div>
+      </div>
+
+      <div class="weather_card">
+        <i class="fa-solid fa-droplet"></i>
+        <div>
+          <p>Humidity</p>
+          <p class="weather_humidity"></p>
+        </div>
+      </div>
+
+      <div class="weather_card">
+        <i class="fa-solid fa-wind"></i>
+        <div>
+          <p>Wind</p>
+          <p class="weather_wind"></p>
+        </div>
+      </div>
+
+      <div class="weather_card">
+        <i class="fa-solid fa-gauge-high"></i>
+        <div>
+          <p>Pressure</p>
+          <p class="weather_pressure"></p>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <script>
+    const city_search = document.querySelector(".Weather_search");
+    const cityname = document.querySelector(".weather_city");
+    const dataTime = document.querySelector(".weather_data_time");
+    const w_forecast = document.querySelector(".weather_forecast");
+    const w_icon = document.querySelector(".weather_icon");
+    const w_temperature = document.querySelector(".weather_temperature");
+    const w_min = document.querySelector(".weather_min");
+    const w_max = document.querySelector(".weather_max");
+    const w_feelslike = document.querySelector(".weather_feelslike");
+    const w_humidity = document.querySelector(".weather_humidity");
+    const w_wind = document.querySelector(".weather_wind");
+    const w_pressure = document.querySelector(".weather_pressure");
+
+    const getCountryName = (code) => {
+      return new Intl.DisplayNames(["en"], { type: "region" }).of(code);
+    };
+
+    const getDataTime = (dt) => {
+      const curDate = new Date(dt * 1000);
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      };
+      const formatter = new Intl.DateTimeFormat("en-us", options);
+      return formatter.format(curDate);
+    };
+
+    //search functionality
+city_search.addEventListener("submit" , (e) => {
+e.preventDefault();
+
+let cityName = document.querySelector(".city_name");
+console.log(cityName.value);
+city = cityName.value;
+
+getWeatherData(city);
+
+cityName.value = ""; 
+});
+    const getWeatherData = async (city) => {
+      const apikey = "5753e1e1e45767b5593e5dbd8d0462e2";
+      const weatherurl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apikey}`;
+
+      try {
+        const res = await fetch(weatherurl);
+        const data = await res.json();
+
+        if (data.cod === "404") {
+          alert("City not found!");
+          return;
+        }
+
+        const { main, name, weather, wind, sys, dt } = data;
+
+        cityname.innerHTML = `${name}, ${getCountryName(sys.country)}`;
+        dataTime.innerHTML = getDataTime(dt);
+
+        w_forecast.innerHTML = weather[0].main;
+        w_icon.innerHTML =`<img src="https://openweathermap.org/img/wn/${weather[0].icon}@2x.png" alt="weather icon">`;
+;
+
+        w_temperature.innerHTML = `${main.temp}&#176`;
+        w_min.innerHTML = ` Min :${main.temp_min.toFixed()}&#176`;
+        w_max.innerHTML = `Max:${main.temp_max.toFixed()}&#176`;
+        w_feelslike.innerHTML = `${main.feels_like.toFixed(2)}&#176`;
+        w_humidity.innerHTML = `${main.humidity}%`;
+        w_wind.innerHTML = `${wind.speed}m/s`;
+        w_pressure.innerHTML = `${main.pressure} hpa`;
+         
+      } catch (error) {
+        console.log("Error:", error);
+      }
+    };
+
+    // Default city on page load
+    window.addEventListener("load", () => getWeatherData("Mumbai"));
+
+    
+      
+    
+  </script>
+</body>
+</html>
